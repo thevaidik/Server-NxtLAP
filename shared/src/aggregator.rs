@@ -50,12 +50,35 @@ impl RacingAggregator {
     }
 
     fn convert_api_event(&self, api_event: ApiEvent, series: Series) -> Option<RacingEvent> {
+        // FILTER: Drop rogue events (Golf, Soccer, etc.) that sneak in via Free Tier
+        if let Some(sport) = &api_event.sport {
+            if sport != "Motorsport" {
+                tracing::warn!("Dropping rogue event: {} (Sport: {})", api_event.event_name, sport);
+                return None;
+            }
+        }
+
         // Parse date
-        let date = api_event
-            .date
-            .as_ref()
-            .and_then(|d| DateTime::parse_from_rfc3339(&format!("{}T00:00:00Z", d)).ok())
-            .map(|dt| dt.with_timezone(&Utc))?;
+        let date_str = if let Some(ts) = &api_event.timestamp {
+            // Try using strTimestamp first (often format: YYYY-MM-DDTHH:mm:ss)
+            format!("{}Z", ts) // Append Z assuming UTC if not present
+        } else if let (Some(d), Some(t)) = (&api_event.date, &api_event.time) {
+            // Combine dateEvent and strTime
+            format!("{}T{}Z", d, t)
+        } else if let Some(d) = &api_event.date {
+            // Fallback to date only (midnight)
+            format!("{}T00:00:00Z", d)
+        } else {
+            return None;
+        };
+
+        let date = DateTime::parse_from_rfc3339(&date_str) // Try standard ISO first
+            .or_else(|_| DateTime::parse_from_rfc3339(&format!("{}Z", date_str.trim_end_matches('Z')))) // Retry robustly
+            .ok()
+            .map(|dt| dt.with_timezone(&Utc));
+
+        // If parsing failed (e.g. empty strings), skip this event
+        let date = date?;
 
         // Calculate TTL (7 days from now)
         let ttl = (Utc::now() + chrono::Duration::days(7)).timestamp();

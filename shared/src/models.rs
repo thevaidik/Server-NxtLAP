@@ -100,4 +100,10 @@ pub struct ApiEvent {
     pub round: Option<String>,
     #[serde(rename = "strDescriptionEN")]
     pub description: Option<String>,
+    #[serde(rename = "strTime")]
+    pub time: Option<String>,
+    #[serde(rename = "strTimestamp")]
+    pub timestamp: Option<String>,
+    #[serde(rename = "strSport")]
+    pub sport: Option<String>,
 }
