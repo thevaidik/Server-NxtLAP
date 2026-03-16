@@ -10,6 +10,7 @@ env.json
 # Local Data / Security
 response.json
 API_GUIDE.md
+BACKEND_GUIDE.md
 
 # OS / IDE
 .DS_Store
