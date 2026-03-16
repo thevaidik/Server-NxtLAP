@@ -31,6 +31,15 @@ pub enum Series {
     WRC,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SeriesMetadata {
+    pub id: String,
+    pub name: String,
+    pub short_name: String,
+    pub category: String,
+    pub description: String,
+}
+
 impl Series {
     pub fn all() -> Vec<Series> {
         vec![
@@ -44,6 +53,78 @@ impl Series {
             Series::V8Supercars,
             Series::WRC,
         ]
+    }
+
+    pub fn metadata(&self) -> SeriesMetadata {
+        match self {
+            Series::Formula1 => SeriesMetadata {
+                id: "formula1".to_string(),
+                name: "Formula 1".to_string(),
+                short_name: "F1".to_string(),
+                category: "Open Wheel".to_string(),
+                description: "The highest class of international racing for open-wheel single-seater formula racing cars.".to_string(),
+            },
+            Series::IndyCar => SeriesMetadata {
+                id: "indycar".to_string(),
+                name: "IndyCar Series".to_string(),
+                short_name: "IndyCar".to_string(),
+                category: "Open Wheel".to_string(),
+                description: "The premier level of open-wheel racing in North America.".to_string(),
+            },
+            Series::MotoGP => SeriesMetadata {
+                id: "motogp".to_string(),
+                name: "MotoGP".to_string(),
+                short_name: "MotoGP".to_string(),
+                category: "Two-Wheel".to_string(),
+                description: "The premier class of motorcycle road racing events held on road circuits.".to_string(),
+            },
+            Series::IMSA => SeriesMetadata {
+                id: "imsa".to_string(),
+                name: "WeatherTech SportsCar Championship".to_string(),
+                short_name: "IMSA".to_string(),
+                category: "Sports Car".to_string(),
+                description: "The premier sports car racing series in the United States and Canada.".to_string(),
+            },
+            Series::SuperGT => SeriesMetadata {
+                id: "supergt".to_string(),
+                name: "Super GT".to_string(),
+                short_name: "Super GT".to_string(),
+                category: "Sports Car".to_string(),
+                description: "The top level of sports car racing in Japan.".to_string(),
+            },
+            Series::BritishGT => SeriesMetadata {
+                id: "britishgt".to_string(),
+                name: "British GT Championship".to_string(),
+                short_name: "British GT".to_string(),
+                category: "Sports Car".to_string(),
+                description: "A sports car racing series based in the United Kingdom featuring GT3 and GT4 cars.".to_string(),
+            },
+            Series::BTCC => SeriesMetadata {
+                id: "btcc".to_string(),
+                name: "British Touring Car Championship".to_string(),
+                short_name: "BTCC".to_string(),
+                category: "Touring Car".to_string(),
+                description: "A touring car racing series held each year in the United Kingdom.".to_string(),
+            },
+            Series::V8Supercars => SeriesMetadata {
+                id: "v8supercars".to_string(),
+                name: "Supercars Championship".to_string(),
+                short_name: "Supercars".to_string(),
+                category: "Touring Car".to_string(),
+                description: "The premier motorsport category in Australasia.".to_string(),
+            },
+            Series::WRC => SeriesMetadata {
+                id: "wrc".to_string(),
+                name: "World Rally Championship".to_string(),
+                short_name: "WRC".to_string(),
+                category: "Rally".to_string(),
+                description: "The highest level of global competition in the motorsport discipline of rallying.".to_string(),
+            },
+        }
+    }
+
+    pub fn all_metadata() -> Vec<SeriesMetadata> {
+        Self::all().into_iter().map(|s| s.metadata()).collect()
     }
 
     pub fn thesportsdb_id(&self) -> &str {

@@ -46,6 +46,15 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
                 .header("Access-Control-Allow-Origin", "*")
                 .body(serde_json::to_string(&events)?.into())?
         }
+        "/series" => {
+            info!("Getting all series metadata");
+            let series_list = Series::all_metadata();
+            Response::builder()
+                .status(200)
+                .header("Content-Type", "application/json")
+                .header("Access-Control-Allow-Origin", "*")
+                .body(serde_json::to_string(&series_list)?.into())?
+        }
         path if path.starts_with("/races/") => {
             let series_name = path.trim_start_matches("/races/");
             info!("Getting races for series: {}", series_name);

@@ -7,6 +7,10 @@ edition = "2021"
 name = "api-handler"
 path = "src/main.rs"
 
+[[bin]]
+name = "api-handler-staging"
+path = "src/main.rs"
+
 [dependencies]
 shared = { path = "../shared" }
 lambda_http = { workspace = true }

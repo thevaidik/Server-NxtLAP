@@ -7,6 +7,10 @@ edition = "2021"
 name = "data-fetcher"
 path = "src/main.rs"
 
+[[bin]]
+name = "data-fetcher-staging"
+path = "src/main.rs"
+
 [dependencies]
 shared = { path = "../shared" }
 lambda_runtime = { workspace = true }

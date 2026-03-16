@@ -13,6 +13,15 @@ Enter:
 - **Default region:** `us-east-1` (or your preferred region)
 - **Default output format:** `json`
 
+### 1a. Configure DynamoDB TTL (One-time)
+```bash
+# Enable TTL on the 'ttl' attribute
+aws dynamodb update-time-to-live \
+    --table-name RacingEvents \
+    --time-to-live-specification "Enabled=true, AttributeName=ttl" \
+    --region us-east-1
+```
+
 ### 2. Deploy
 ```bash
 cd "/Users/vaidikdubey/Developer/NxtLAP Folder/Server NxtLAP"
