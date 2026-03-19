@@ -1,0 +1,10 @@
+{
+  "rawPath": "/news",
+  "rawQueryString": "limit=5",
+  "requestContext": {
+    "http": {
+      "method": "GET",
+      "path": "/news"
+    }
+  }
+}

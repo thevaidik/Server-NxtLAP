@@ -1,0 +1,19 @@
+[package]
+name = "news-api"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "news-api"
+path = "src/main.rs"
+
+[dependencies]
+shared = { path = "../shared" }
+aws-config = { workspace = true }
+aws-sdk-dynamodb = { workspace = true }
+lambda_http = { workspace = true }
+tokio = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }

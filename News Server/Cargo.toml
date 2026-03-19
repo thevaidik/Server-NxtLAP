@@ -1,12 +1,11 @@
 [workspace]
-members = ["data-fetcher", "api-handler", "shared"]
-exclude = ["News Server"]
+members = ["news-fetcher", "news-api", "shared"]
 resolver = "2"
 
 [workspace.dependencies]
-# AWS SDK
-aws-config = { version = "1.1", features = ["behavior-version-latest"] }
-aws-sdk-dynamodb = "1.12"
+# AWS SDK — pinned to match existing workspace (rustc 1.88 compatible)
+aws-config = { version = "=1.8.12", features = ["behavior-version-latest"] }
+aws-sdk-dynamodb = "=1.103.0"
 
 # Lambda
 lambda_runtime = "0.11"
@@ -18,10 +17,12 @@ tokio = { version = "1", features = ["full"] }
 # HTTP client
 reqwest = { version = "0.11", default-features = false, features = ["json", "rustls-tls"] }
 
+# XML parsing (RSS feeds)
+roxmltree = "0.19"
+
 # Serialization
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-serde_dynamo = "4"
 
 # Date/Time
 chrono = { version = "0.4", features = ["serde"] }
