@@ -1,0 +1,78 @@
+use anyhow::{Context, Result};
+use chrono::{DateTime, Utc};
+use reqwest::Client;
+use std::collections::HashMap;
+use crate::models::{OpenF1Meeting, OpenF1Session, RacingEvent, Series};
+
+pub struct OpenF1Client {
+    client: Client,
+    base_url: String,
+}
+
+impl OpenF1Client {
+    pub fn new() -> Self {
+        Self {
+            client: Client::new(),
+            base_url: "https://api.openf1.org/v1".to_string(),
+        }
+    }
+
+    pub async fn get_events(&self, year: &str) -> Result<Vec<RacingEvent>> {
+        let meetings_url = format!("{}/meetings?year={}", self.base_url, year);
+        let sessions_url = format!("{}/sessions?year={}", self.base_url, year);
+
+        tracing::info!("Fetching OpenF1 meetings from {}", meetings_url);
+        let meetings_resp = self.client.get(&meetings_url).send().await.context("Failed to fetch meetings")?;
+        let meetings: Vec<OpenF1Meeting> = meetings_resp.json().await.context("Failed to parse meetings")?;
+
+        let mut meeting_map = HashMap::new();
+        for m in meetings {
+            meeting_map.insert(m.meeting_key, m.meeting_name);
+        }
+
+        tracing::info!("Fetching OpenF1 sessions from {}", sessions_url);
+        let sessions_resp = self.client.get(&sessions_url).send().await.context("Failed to fetch sessions")?;
+        let sessions: Vec<OpenF1Session> = sessions_resp.json().await.context("Failed to parse sessions")?;
+
+        let mut racing_events = Vec::new();
+
+        for s in sessions {
+            let meeting_name = meeting_map
+                .get(&s.meeting_key)
+                .cloned()
+                .unwrap_or_else(|| "Unknown Meeting".to_string());
+            
+            let event_name = format!("{} {}", meeting_name, s.session_name)
+                .trim()
+                .to_string();
+
+            let date_str = s.date_start.clone();
+            
+            let parsed_date = DateTime::parse_from_rfc3339(&date_str)
+                .ok()
+                .map(|dt| dt.with_timezone(&Utc));
+
+            if let Some(date) = parsed_date {
+                let ttl = (Utc::now() + chrono::Duration::days(7)).timestamp();
+                
+                racing_events.push(RacingEvent {
+                    id: s.session_key.to_string(),
+                    series: Series::Formula1,
+                    event_name,
+                    circuit: s.circuit_short_name,
+                    date,
+                    country: s.country_name,
+                    season: s.year.to_string(),
+                    round: None,
+                    description: None,
+                    ttl,
+                });
+            } else {
+                tracing::warn!("Failed to parse date {} for event {}", date_str, event_name);
+            }
+        }
+
+        tracing::info!("Successfully parsed {} OpenF1 events", racing_events.len());
+        Ok(racing_events)
+    }
+}

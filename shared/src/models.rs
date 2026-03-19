@@ -188,3 +188,22 @@ pub struct ApiEvent {
     #[serde(rename = "strSport")]
     pub sport: Option<String>,
 }
+
+// OpenF1 API response models
+#[derive(Debug, Deserialize)]
+pub struct OpenF1Meeting {
+    pub meeting_key: i64,
+    pub meeting_name: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenF1Session {
+    pub session_key: i64,
+    pub session_type: String,
+    pub session_name: String,
+    pub date_start: String,
+    pub meeting_key: i64,
+    pub circuit_short_name: String,
+    pub country_name: String,
+    pub year: i32,
+}

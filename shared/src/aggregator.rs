@@ -2,15 +2,18 @@ use anyhow::{Context, Result};
 use chrono::{DateTime, Utc};
 use crate::models::{ApiEvent, RacingEvent, Series};
 use crate::thesportsdb_client::TheSportsDBClient;
+use crate::openf1_client::OpenF1Client;
 
 pub struct RacingAggregator {
     client: TheSportsDBClient,
+    openf1_client: OpenF1Client,
 }
 
 impl RacingAggregator {
     pub fn new(api_key: String) -> Self {
         Self {
             client: TheSportsDBClient::new(api_key),
+            openf1_client: OpenF1Client::new(),
         }
     }
 
@@ -35,10 +38,13 @@ impl RacingAggregator {
     }
 
     async fn fetch_series_events(&self, series: Series) -> Result<Vec<RacingEvent>> {
+        if series == Series::Formula1 {
+            let current_year = chrono::Utc::now().format("%Y").to_string();
+            return self.openf1_client.get_events(&current_year).await;
+        }
+
         // Fetch full 2025 season (get_next_events now uses eventsseason.php)
         let all_events = self.client.get_next_events(series, 0).await?;
-
-        // Convert API events to RacingEvent
 
         // Convert API events to RacingEvent
         let racing_events: Vec<RacingEvent> = all_events
