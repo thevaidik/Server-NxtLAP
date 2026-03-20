@@ -2,7 +2,7 @@ use anyhow::{Context, Result};
 use aws_sdk_dynamodb::Client;
 use chrono::Utc;
 use serde_json;
-use crate::models::{RacingEvent, Series};
+use crate::models::{RacingEvent, Series, F1Standings};
 
 pub struct DynamoDBService {
     client: Client,
@@ -96,5 +96,45 @@ impl DynamoDBService {
             .context("Failed to delete item from DynamoDB")?;
 
         Ok(())
+    }
+
+    pub async fn put_standings(&self, standings: &F1Standings) -> Result<()> {
+        let json_str = serde_json::to_string(standings)?;
+
+        self.client
+            .put_item()
+            .table_name(&self.table_name)
+            .item("id", aws_sdk_dynamodb::types::AttributeValue::S("f1_standings_current".to_string()))
+            .item("data", aws_sdk_dynamodb::types::AttributeValue::S(json_str))
+            .item("type", aws_sdk_dynamodb::types::AttributeValue::S("standings".to_string()))
+            .item("ttl", aws_sdk_dynamodb::types::AttributeValue::N(standings.ttl.to_string()))
+            .send()
+            .await
+            .context("Failed to put standings in DynamoDB")?;
+
+        Ok(())
+    }
+
+    pub async fn get_standings(&self) -> Result<Option<F1Standings>> {
+        let result = self.client
+            .get_item()
+            .table_name(&self.table_name)
+            .key("id", aws_sdk_dynamodb::types::AttributeValue::S("f1_standings_current".to_string()))
+            .send()
+            .await
+            .context("Failed to get standings from DynamoDB")?;
+
+        match result.item {
+            Some(item) => {
+                if let Some(aws_sdk_dynamodb::types::AttributeValue::S(json_str)) = item.get("data") {
+                    let standings = serde_json::from_str::<F1Standings>(json_str)
+                        .context("Failed to parse standings JSON")?;
+                    Ok(Some(standings))
+                } else {
+                    Ok(None)
+                }
+            }
+            None => Ok(None),
+        }
     }
 }

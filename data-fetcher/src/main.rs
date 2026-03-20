@@ -3,7 +3,7 @@ use aws_config::BehaviorVersion;
 use aws_sdk_dynamodb::Client as DynamoDBClient;
 use lambda_runtime::{run, service_fn, Error, LambdaEvent};
 use serde_json::Value;
-use shared::{DynamoDBService, RacingAggregator};
+use shared::{DynamoDBService, OpenF1Client, RacingAggregator};
 use tracing::info;
 
 async fn function_handler(_event: LambdaEvent<Value>) -> Result<Value, Error> {
@@ -32,6 +32,19 @@ async fn function_handler(_event: LambdaEvent<Value>) -> Result<Value, Error> {
     db_service.put_events(events.clone()).await?;
 
     info!("Successfully stored {} events in DynamoDB", events.len());
+
+    // Fetch and store F1 standings
+    let openf1_client = OpenF1Client::new();
+    match openf1_client.get_standings().await {
+        Ok(standings) => {
+            db_service.put_standings(&standings).await?;
+            info!("Successfully stored F1 standings (session_key: {})", standings.session_key);
+        }
+        Err(e) => {
+            // Don't fail the whole function if standings fetch fails
+            tracing::warn!("Failed to fetch F1 standings: {}", e);
+        }
+    }
 
     Ok(serde_json::json!({
         "statusCode": 200,

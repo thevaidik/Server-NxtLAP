@@ -55,6 +55,25 @@ async fn function_handler(event: Request) -> Result<Response<Body>, Error> {
                 .header("Access-Control-Allow-Origin", "*")
                 .body(serde_json::to_string(&series_list)?.into())?
         }
+        "/f1/standings" => {
+            info!("Getting F1 standings");
+            match db_service.get_standings().await? {
+                Some(standings) => {
+                    Response::builder()
+                        .status(200)
+                        .header("Content-Type", "application/json")
+                        .header("Access-Control-Allow-Origin", "*")
+                        .body(serde_json::to_string(&standings)?.into())?
+                }
+                None => {
+                    Response::builder()
+                        .status(404)
+                        .header("Content-Type", "application/json")
+                        .header("Access-Control-Allow-Origin", "*")
+                        .body(serde_json::json!({"error": "Standings not available yet"}).to_string().into())?
+                }
+            }
+        }
         path if path.starts_with("/races/") => {
             let series_name = path.trim_start_matches("/races/");
             info!("Getting races for series: {}", series_name);

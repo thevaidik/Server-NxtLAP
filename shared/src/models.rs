@@ -189,6 +189,47 @@ pub struct ApiEvent {
     pub sport: Option<String>,
 }
 
+// F1 Standings models
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct F1DriverStanding {
+    pub driver_number: i32,
+    pub position: i32,
+    pub points: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct F1TeamStanding {
+    pub team_name: String,
+    pub position: i32,
+    pub points: f64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct F1Standings {
+    pub drivers: Vec<F1DriverStanding>,
+    pub constructors: Vec<F1TeamStanding>,
+    pub session_key: i64,
+    pub updated_at: DateTime<Utc>,
+    pub ttl: i64,
+}
+
+// OpenF1 raw API response models for standings
+#[derive(Debug, Deserialize)]
+pub struct OpenF1DriverStandingRaw {
+    pub driver_number: i32,
+    pub session_key: i64,
+    pub position_current: i32,
+    pub points_current: f64,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct OpenF1TeamStandingRaw {
+    pub team_name: String,
+    pub session_key: i64,
+    pub position_current: i32,
+    pub points_current: f64,
+}
+
 // OpenF1 API response models
 #[derive(Debug, Deserialize)]
 pub struct OpenF1Meeting {
