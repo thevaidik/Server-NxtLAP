@@ -53,7 +53,7 @@ impl OpenF1Client {
                 .map(|dt| dt.with_timezone(&Utc));
 
             if let Some(date) = parsed_date {
-                let ttl = (Utc::now() + chrono::Duration::days(7)).timestamp();
+                let ttl = (Utc::now() + chrono::Duration::days(30)).timestamp();
                 
                 racing_events.push(RacingEvent {
                     id: s.session_key.to_string(),

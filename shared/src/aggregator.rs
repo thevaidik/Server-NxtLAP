@@ -86,8 +86,8 @@ impl RacingAggregator {
         // If parsing failed (e.g. empty strings), skip this event
         let date = date?;
 
-        // Calculate TTL (7 days from now)
-        let ttl = (Utc::now() + chrono::Duration::days(7)).timestamp();
+        // Calculate TTL (30 days from now)
+        let ttl = (Utc::now() + chrono::Duration::days(30)).timestamp();
 
         Some(RacingEvent {
             id: api_event.id,
