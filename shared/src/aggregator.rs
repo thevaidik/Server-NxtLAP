@@ -3,10 +3,12 @@ use chrono::{DateTime, Utc};
 use crate::models::{ApiEvent, RacingEvent, Series};
 use crate::thesportsdb_client::TheSportsDBClient;
 use crate::openf1_client::OpenF1Client;
+use crate::motogp_client::MotoGPClient;
 
 pub struct RacingAggregator {
     client: TheSportsDBClient,
     openf1_client: OpenF1Client,
+    motogp_client: MotoGPClient,
 }
 
 impl RacingAggregator {
@@ -14,6 +16,7 @@ impl RacingAggregator {
         Self {
             client: TheSportsDBClient::new(api_key),
             openf1_client: OpenF1Client::new(),
+            motogp_client: MotoGPClient::new(),
         }
     }
 
@@ -41,6 +44,11 @@ impl RacingAggregator {
         if series == Series::Formula1 {
             let current_year = chrono::Utc::now().format("%Y").to_string();
             return self.openf1_client.get_events(&current_year).await;
+        }
+
+        if series == Series::MotoGP {
+            let current_year = chrono::Utc::now().format("%Y").to_string();
+            return self.motogp_client.get_events(&current_year).await;
         }
 
         // Fetch full 2025 season (get_next_events now uses eventsseason.php)
